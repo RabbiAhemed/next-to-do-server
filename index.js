@@ -23,10 +23,11 @@ async function run() {
 
     // Add Task
     app.post("/tasks", async (req, res) => {
-      const newTaskInfo = req?.body;
+      const newTaskInfo = req.body;
       const newTask = await tasksCollection.insertOne(newTaskInfo);
       res.send(newTask);
     });
+
     // All Tasks Data
     app.get("/tasks", async (req, res) => {
       const query = {};
