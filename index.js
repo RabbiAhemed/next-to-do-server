@@ -20,6 +20,9 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const tasksCollection = client.db("NextToDo").collection("tasks");
+    const completedTasksCollection = client
+      .db("NextToDo")
+      .collection("completed");
 
     //Get All Tasks Data
     app.get("/tasks", async (req, res) => {
@@ -34,14 +37,41 @@ async function run() {
       const newTask = await tasksCollection.insertOne(newTaskInfo);
       res.send(newTask);
     });
-    // Delete Task
+    // Delete Task from My Task Collection
     app.delete("/tasks/:id", async (req, res) => {
       const id = req.params.id;
       console.log(req.params);
       const query = { _id: ObjectId(id) };
+      console.log("my task collection query", query);
       const result = await tasksCollection.deleteOne(query);
       res.send(result);
-      console.log("deleting", id);
+      console.log("deleting my task", id);
+      console.log(result);
+    });
+    // Add Task to completed tasks collection
+    app.put("/completed", async (req, res) => {
+      const completedTaskInfo = req.body;
+      const completedTask = await completedTasksCollection.insertOne(
+        completedTaskInfo
+      );
+      res.send(completedTask);
+    });
+    //Get All Completed Tasks Data
+    app.get("/completed", async (req, res) => {
+      const query = {};
+      const cursor = completedTasksCollection.find(query);
+      const completedTasks = await cursor.toArray();
+      res.send(completedTasks);
+    });
+    // Delete Task from My Completed Task Collection
+    app.delete("/completed/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(req.params);
+      const query = { _id: ObjectId(id) };
+      console.log("query", query);
+      const result = await completedTasksCollection.deleteOne(query);
+      res.send(result);
+      console.log("deleting from completed task", id);
       console.log(result);
     });
   } finally {
